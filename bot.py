@@ -4,8 +4,13 @@ import requests
 import time
 from datetime import datetime
 
-TOKEN = os.environ["BOT_TOKEN"]
-CHAT_ID = "-1003610983854"
+import sys
+
+TOKEN = os.environ.get("BOT_TOKEN")
+if not TOKEN:
+    print("❌ ERROR: BOT_TOKEN environment variable is not set. Add it in Railway → Variables.")
+    sys.exit(1)
+CHAT_ID = os.environ.get("CHAT_ID", "-1003610983854")
 API = f"https://api.telegram.org/bot{TOKEN}"
 
 MEMES = [
@@ -116,14 +121,14 @@ def handle(msg):
         name = " ".join(filter(None, [first, last])) or "Unknown"
         msgs = leaderboard.get(uid, {}).get("count", 0)
         rank = sum(1 for u in leaderboard.values() if u["count"] > msgs) + 1
-        send(f"👤 User Profile\n━━━━━━━━━━━━━━\n🏷 Name: {name}\n📛 @{username or 'no_username'}\n🆔 ID: {uid}\n💬 Messages: {msgs}\n🏆 Rank: #{rank}\n━━━━━━━━━━━━━━\n💎 Keep HODLing! 🚀")
+        send(f"👤 User Profile\n━━━━━━━━━━━━━━\n🏷 Name: {name}\n📛 @{username or 'no_username'}\n🆔 ID: {uid}\n💬 Messages: {msgs}\n🏆 Rank: #{rank}\n━━━━━━━━━━━━━\n💎 Keep HODLing! 🚀")
     elif cmd == "/price":
-        send(f"📊 Live Crypto Prices\n━━━━━━━━━━━━━━\n{get_prices()}\n━━━━━━━━━━━━━━\n⏰ {datetime.utcnow().strftime('%H:%M:%S')} UTC\nSource: CoinGecko")
+        send(f"📊 Live Crypto Prices\n━━━━━━━━━━━━━\n{get_prices()}\n━━━━━━━━━━━━━\n⏰ {datetime.utcnow().strftime('%H:%M:%S')} UTC\nSource: CoinGecko")
     elif cmd == "/leaderboard":
         medals = ["🥇","🥈","🥉","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔟"]
         sorted_lb = sorted(leaderboard.items(), key=lambda x: x[1]["count"], reverse=True)[:10]
         lines = [f"{medals[i]} @{u.get('username') or u.get('name','Unknown')} — {u['count']} msgs" for i,(_,u) in enumerate(sorted_lb)] if sorted_lb else ["No activity yet! 💬"]
-        send("🏆 OLDY CRYPTO Leaderboard\n━━━━━━━━━━━━━━\n" + "\n".join(lines) + "\n━━━━━━━━━━━━━━\n💎 Most active members!")
+        send("🏆 OLDY CRYPTO Leaderboard\n━━━━━━━━━━━━━\n" + "\n".join(lines) + "\n━━━━━━━━━━━━━\n💎 Most active members!")
 
 def main():
     print("🤖 OLDY CRYPTO Bot started! Listening...")
