@@ -1,6 +1,6 @@
 import os
 from telegram import Update, WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup, MenuButtonWebApp
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+from telegram.ext import Application, CommandHandler, ContextTypes
 
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
 WEB_APP_URL = os.environ.get('WEB_APP_URL', 'https://noor101-dev.github.io/Handy/trading-academy.html')
@@ -8,13 +8,10 @@ WEB_APP_URL = os.environ.get('WEB_APP_URL', 'https://noor101-dev.github.io/Handy
 async def start(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     first = user.first_name if user else 'Trader'
-
     button = InlineKeyboardButton(
         text='🚀 Open CoinForge Academy',
         web_app=WebAppInfo(url=WEB_APP_URL)
     )
-    markup = InlineKeyboardMarkup([[button]])
-
     await update.message.reply_text(
         f'👋 Welcome to *CoinForge*, {first}!\n\n'
         '📈 Live crypto trading sessions with real instructors.\n'
@@ -22,7 +19,7 @@ async def start(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         '⚡ Real charts. Real setups. No fluff.\n\n'
         'Tap below to open the academy 👇',
         parse_mode='Markdown',
-        reply_markup=markup
+        reply_markup=InlineKeyboardMarkup([[button]])
     )
 
 async def help_cmd(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
@@ -64,7 +61,7 @@ async def live_cmd(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         reply_markup=InlineKeyboardMarkup([[button]])
     )
 
-async def post_init(app):
+async def post_init(app: Application):
     await app.bot.set_my_commands([
         ('start', 'Open CoinForge Academy'),
         ('batches', 'View batch pricing'),
@@ -79,13 +76,13 @@ async def post_init(app):
     )
 
 def main():
-    app = ApplicationBuilder().token(BOT_TOKEN).post_init(post_init).build()
+    app = Application.builder().token(BOT_TOKEN).post_init(post_init).build()
     app.add_handler(CommandHandler('start', start))
     app.add_handler(CommandHandler('help', help_cmd))
     app.add_handler(CommandHandler('batches', batches_cmd))
     app.add_handler(CommandHandler('live', live_cmd))
     print('CoinForge bot is running...')
-    app.run_polling()
+    app.run_polling(drop_pending_updates=True)
 
 if __name__ == '__main__':
     main()
